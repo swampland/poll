@@ -34,12 +34,14 @@ function App() {
       }
     });
 
-    if (Object.keys(scores).length === 0) return [];
+    // Returner en sortert liste over alle partier med poeng (0 hvis ingen match)
+    const allParties = Object.keys(scores).map((party) => ({
+      code: party,
+      score: scores[party],
+    }));
 
-    const maxScore = Math.max(...Object.values(scores));
-    return Object.entries(scores)
-      .filter(([, score]) => score === maxScore)
-      .map(([party]) => party);
+    // Sorter etter poeng (høyest til lavest)
+    return allParties.sort((a, b) => b.score - a.score);
   };
 
   console.log("Current Step:", currentStep); // Debugging
@@ -50,7 +52,14 @@ function App() {
 
   if (currentStep > questions.length) {
     const results = calculateResults();
-    return <Results results={results} answers={answers} onRestart={handleRestart} />;
+    return (
+      <Results
+        results={results}
+        answers={answers}
+        onRestart={handleRestart}
+        totalSteps={questions.length} // Ny prop
+      />
+    );
   }
 
   if (currentStep >= 1 && currentStep <= questions.length) {

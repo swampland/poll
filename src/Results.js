@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { parties } from "./data";
 
-function Results({ results, answers, onRestart }) {
+function Results({ results, answers, onRestart, totalSteps }) {
   const [submitted, setSubmitted] = useState(false);
 
   useEffect(() => {
@@ -20,32 +20,48 @@ function Results({ results, answers, onRestart }) {
       .catch((error) => console.error("Feil ved sending av svar:", error));
   }, [answers]);
 
+  // Funksjon for å bestemme bakgrunnsfarge basert på poengsum
+  const getScoreColor = (score, maxScore) => {
+    const percentage = (score / maxScore) * 100;
+    if (percentage >= 80) return "bg-green-100"; // Høy likhet
+    if (percentage >= 50) return "bg-yellow-100"; // Middels likhet
+    return "bg-red-100"; // Lav likhet
+  };
+
   return (
     <div className="flex flex-col items-center justify-center min-h-screen bg-gray-100 p-4">
       <h2 className="text-3xl font-bold text-gray-800 mb-6 text-center">
         Din politiske tilhørighet
       </h2>
-      {results.length > 0 ? (
-        <div className="text-center max-w-lg">
-          <p className="text-lg text-gray-600 mb-4">
-            Basert på dine svar, samsvarer dine synspunkter mest med:
-          </p>
-          <ul className="space-y-4">
-            {results.map((partyCode) => (
-              <li key={partyCode} className="p-4 bg-white rounded-lg shadow-sm">
-                <strong className="text-xl text-blue-600">
-                  {parties[partyCode].name}
-                </strong>
-                <p className="text-gray-700">{parties[partyCode].description}</p>
+      <div className="text-center max-w-lg w-full">
+        <p className="text-lg text-gray-600 mb-4">
+          Her er en rangert oversikt over hvordan dine svar samsvarer med partiene:
+        </p>
+        {results.length > 0 ? (
+          <ul className="space-y-2">
+            {results.map((result, index) => (
+              <li
+                key={result.code}
+                className={`flex justify-between items-center p-2 rounded-md shadow-sm text-gray-800 ${getScoreColor(
+                  result.score,
+                  totalSteps
+                )}`}
+              >
+                <span className="font-semibold">
+                  {index + 1}. {parties[result.code].name}
+                </span>
+                <span className="text-gray-600">
+                  {Math.round((result.score / totalSteps) * 100)}%
+                </span>
               </li>
             ))}
           </ul>
-        </div>
-      ) : (
-        <p className="text-lg text-gray-600">
-          Ingen klar tilhørighet kunne fastslås basert på dine svar.
-        </p>
-      )}
+        ) : (
+          <p className="text-lg text-gray-600">
+            Ingen partier matchet dine svar fullstendig.
+          </p>
+        )}
+      </div>
       {submitted && (
         <p className="mt-6 text-green-600 font-semibold">
           Takk for at du deltok! Dine svar er registrert.
