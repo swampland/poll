@@ -1,24 +1,39 @@
 import React, { useState, useEffect } from "react";
+import { initializeApp } from "firebase/app";
+import { getFirestore, collection, addDoc } from "firebase/firestore";
 import { parties } from "./data";
+
+const firebaseConfig = {
+  apiKey: process.env.REACT_APP_FIREBASE_API_KEY,
+  authDomain: process.env.REACT_APP_AUTH_DOMAIN,
+  projectId: process.env.REACT_APP_PROJECT_ID,
+  storageBucket: process.env.REACT_APP_STORAGE_BUCKET,
+  messagingSenderId: process.env.REACT_APP_MESSAGING_SENDER_ID,
+  appId: process.env.REACT_APP_APP_ID,
+  measurementId: process.env.REACT_APP_MEASUREMENT_ID
+};
+
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
 
 function Results({ results, answers, onRestart, totalSteps }) {
   const [submitted, setSubmitted] = useState(false);
 
   useEffect(() => {
-    fetch("/api/poll/results", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(answers),
-    })
-      .then((response) => {
-        if (response.ok) {
-          setSubmitted(true);
-        } else {
-          console.error("Kunne ikke sende svar");
-        }
-      })
-      .catch((error) => console.error("Feil ved sending av svar:", error));
-  }, [answers]);
+    const submitResults = async () => {
+      try {
+        await addDoc(collection(db, "poll_results"), {
+          timestamp: new Date().toISOString(),
+          answers,
+          results,
+        });
+        setSubmitted(true);
+      } catch (error) {
+        console.error("Feil ved sending av svar:", error);
+      }
+    };
+    submitResults();
+  }, [answers, results]);
 
   const getScoreColor = (score) => {
     if (score >= 80) return "bg-green-100";
