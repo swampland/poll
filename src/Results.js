@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { initializeApp } from "firebase/app";
 import { getFirestore, collection, addDoc } from "firebase/firestore";
+import axios from "axios";
 import { parties } from "./data";
 
 const firebaseConfig = {
@@ -10,11 +11,14 @@ const firebaseConfig = {
   storageBucket: process.env.REACT_APP_STORAGE_BUCKET,
   messagingSenderId: process.env.REACT_APP_MESSAGING_SENDER_ID,
   appId: process.env.REACT_APP_APP_ID,
-  measurementId: process.env.REACT_APP_MEASUREMENT_ID
 };
 
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
+
+const generateSessionId = () => {
+  return Math.random().toString(36).substring(2) + Date.now().toString(36);
+};
 
 function Results({ results, answers, onRestart, totalSteps }) {
   const [submitted, setSubmitted] = useState(false);
@@ -22,11 +26,19 @@ function Results({ results, answers, onRestart, totalSteps }) {
   useEffect(() => {
     const submitResults = async () => {
       try {
-        await addDoc(collection(db, "poll_results"), {
+        const ipResponse = await axios.get("https://api.ipify.org?format=json");
+        const ipAddress = ipResponse.data.ip;
+
+        const sessionData = {
           timestamp: new Date().toISOString(),
+          ipAddress,
+          userAgent: navigator.userAgent,
+          sessionId: generateSessionId(),
           answers,
           results,
-        });
+        };
+
+        await addDoc(collection(db, "poll_results"), sessionData);
         setSubmitted(true);
       } catch (error) {
         console.error("Feil ved sending av svar:", error);
