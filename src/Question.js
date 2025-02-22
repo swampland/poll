@@ -3,18 +3,17 @@ import React, { useState } from "react";
 function Question({ question, onAnswer, currentStep, totalSteps }) {
   const [selectedOption, setSelectedOption] = useState(null);
 
-  const handleSelect = (optionId) => {
-    setSelectedOption(optionId);
+  const handleSelect = (optionValue) => {
+    setSelectedOption(optionValue);
   };
 
   const handleSubmit = () => {
-    if (selectedOption) {
+    if (selectedOption !== null) {
       onAnswer(question.id, selectedOption);
-      setSelectedOption(null); // Tilbakestill for neste spørsmål
+      setSelectedOption(null);
     }
   };
 
-  // Hvis question er undefined, vis en feilmelding
   if (!question) {
     return (
       <div className="flex flex-col items-center justify-center min-h-screen bg-gray-100 p-4">
@@ -40,9 +39,9 @@ function Question({ question, onAnswer, currentStep, totalSteps }) {
             <input
               type="radio"
               name={`question-${question.id}`}
-              value={option.id}
-              checked={selectedOption === option.id}
-              onChange={() => handleSelect(option.id)}
+              value={option.value}
+              checked={selectedOption === option.value}
+              onChange={() => handleSelect(option.value)}
               className="form-radio text-blue-600"
             />
             <span className="text-gray-700">{option.text}</span>
@@ -51,7 +50,7 @@ function Question({ question, onAnswer, currentStep, totalSteps }) {
       </div>
       <button
         onClick={handleSubmit}
-        disabled={!selectedOption}
+        disabled={selectedOption === null}
         className="mt-8 px-6 py-3 bg-blue-600 text-white font-semibold rounded-lg shadow-md hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
       >
         Neste

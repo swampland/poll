@@ -20,12 +20,10 @@ function Results({ results, answers, onRestart, totalSteps }) {
       .catch((error) => console.error("Feil ved sending av svar:", error));
   }, [answers]);
 
-  // Funksjon for å bestemme bakgrunnsfarge basert på poengsum
-  const getScoreColor = (score, maxScore) => {
-    const percentage = (score / maxScore) * 100;
-    if (percentage >= 80) return "bg-green-100"; // Høy likhet
-    if (percentage >= 50) return "bg-yellow-100"; // Middels likhet
-    return "bg-red-100"; // Lav likhet
+  const getScoreColor = (score) => {
+    if (score >= 80) return "bg-green-100";
+    if (score >= 50) return "bg-yellow-100";
+    return "bg-red-100";
   };
 
   return (
@@ -42,17 +40,12 @@ function Results({ results, answers, onRestart, totalSteps }) {
             {results.map((result, index) => (
               <li
                 key={result.code}
-                className={`flex justify-between items-center p-2 rounded-md shadow-sm text-gray-800 ${getScoreColor(
-                  result.score,
-                  totalSteps
-                )}`}
+                className={`flex justify-between items-center p-2 rounded-md shadow-sm text-gray-800 ${getScoreColor(result.score)}`}
               >
                 <span className="font-semibold">
                   {index + 1}. {parties[result.code].name}
                 </span>
-                <span className="text-gray-600">
-                  {Math.round((result.score / totalSteps) * 100)}%
-                </span>
+                <span className="text-gray-600">{result.score}%</span>
               </li>
             ))}
           </ul>

@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import Introduction from "./Introduction";
 import Question from "./Question";
 import Results from "./Results";
-import { questions } from "./data";
+import { questions, partyPositions, parties } from "./data";
 
 function App() {
   const [currentStep, setCurrentStep] = useState(0);
@@ -12,8 +12,8 @@ function App() {
     setCurrentStep(1);
   };
 
-  const handleAnswer = (questionId, optionId) => {
-    setAnswers((prev) => ({ ...prev, [questionId]: optionId }));
+  const handleAnswer = (questionId, optionValue) => {
+    setAnswers((prev) => ({ ...prev, [questionId]: optionValue }));
     setCurrentStep((prev) => prev + 1);
   };
 
@@ -24,27 +24,56 @@ function App() {
 
   const calculateResults = () => {
     const scores = {};
-    questions.forEach((question) => {
-      const selectedOption = answers[question.id];
-      if (selectedOption && question.partySupport[selectedOption]) {
-        const parties = question.partySupport[selectedOption];
-        parties.forEach((party) => {
-          scores[party] = (scores[party] || 0) + 1;
-        });
+    const maxDistancePerQuestion = 4; // Maks avstand mellom -2 og 2
+
+    Object.keys(parties).forEach((partyCode) => {
+      let totalDistance = 0;
+      let validQuestions = 0;
+
+      questions.forEach((question, index) => {
+        const userAnswer = answers[question.id];
+        const partyPosition = partyPositions[partyCode][index];
+
+        if (userAnswer !== undefined && partyPosition !== undefined) {
+          validQuestions++;
+
+          // Manhattan-avstand basert på NRKs algoritme
+          let distance = Math.abs(userAnswer - partyPosition);
+
+          // Spesiell håndtering av verdier nær 0 (±0.3)
+          const isUserNearZero = Math.abs(userAnswer) <= 0.3;
+          const isPartyNearZero = Math.abs(partyPosition) <= 0.3;
+
+          if (isUserNearZero && isPartyNearZero) {
+            distance = 0; // Full match hvis begge er nær 0
+          } else if (isUserNearZero || isPartyNearZero) {
+            distance *= 2; // Dobbel avstand hvis bare én er nær 0
+          }
+
+          totalDistance += distance;
+        }
+      });
+
+      if (validQuestions === 0) {
+        scores[partyCode] = 0; // Ingen gyldige svar, sett til 0%
+      } else {
+        // Normaliser avstand til [0, 1], der 0 er maks avstand og 1 er ingen avstand
+        const maxPossibleDistance = validQuestions * maxDistancePerQuestion;
+        const normalizedDistance = totalDistance / maxPossibleDistance;
+        const similarity = 1 - normalizedDistance; // 1 er nærmest, 0 er lengst unna
+        scores[partyCode] = Math.round(similarity * 100); // Konverter til prosent
       }
     });
 
-    // Returner en sortert liste over alle partier med poeng (0 hvis ingen match)
-    const allParties = Object.keys(scores).map((party) => ({
-      code: party,
-      score: scores[party],
+    const resultList = Object.keys(scores).map((partyCode) => ({
+      code: partyCode,
+      score: scores[partyCode],
     }));
 
-    // Sorter etter poeng (høyest til lavest)
-    return allParties.sort((a, b) => b.score - a.score);
+    return resultList.sort((a, b) => b.score - a.score); // Sorter fra høyest til lavest
   };
 
-  console.log("Current Step:", currentStep); // Debugging
+  console.log("Current Step:", currentStep);
 
   if (currentStep === 0) {
     return <Introduction onStart={handleStart} />;
@@ -57,7 +86,7 @@ function App() {
         results={results}
         answers={answers}
         onRestart={handleRestart}
-        totalSteps={questions.length} // Ny prop
+        totalSteps={questions.length}
       />
     );
   }
@@ -74,7 +103,6 @@ function App() {
     );
   }
 
-  // Fallback i tilfelle noe går galt
   return (
     <div>
       <p>En uventet feil oppstod. Vennligst start på nytt.</p>
