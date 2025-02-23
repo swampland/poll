@@ -7,7 +7,7 @@ function Introduction({ onStart }) {
         Norsk Politisk Poll 2025
       </h1>
       <p className="text-lg text-gray-600 mb-8 text-center max-w-md">
-        Svar på en serie spørsmål for å oppdage hvilket politisk parti som passer best med dine synspunkter frem mot stortingsvalget i 2025.
+        Svar på en serie spørsmål for å finne ut hvilket politisk parti som passer best med dine synspunkter frem mot stortingsvalget i 2025.
       </p>
       <button
         onClick={onStart}

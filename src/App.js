@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import Introduction from "./Introduction";
 import Question from "./Question";
 import Results from "./Results";
-import { questions, partyPositions, parties } from "./data";
+import { questions, parties } from "./data";
 
 function App() {
   const [currentStep, setCurrentStep] = useState(0);
@@ -30,17 +30,26 @@ function App() {
       let totalDistance = 0;
       let validQuestions = 0;
 
-      questions.forEach((question, index) => {
+      questions.forEach((question) => {
         const userAnswer = answers[question.id];
-        const partyPosition = partyPositions[partyCode][index];
 
-        if (userAnswer !== undefined && partyPosition !== undefined) {
+        if (userAnswer !== undefined) {
           validQuestions++;
 
-          // Manhattan-avstand basert på NRKs algoritme
-          let distance = Math.abs(userAnswer - partyPosition);
+          // Finn partiets posisjon ved å sjekke hvilket alternativ det tilhører
+          let partyPosition = null;
+          question.options.forEach((option) => {
+            if (option.parties.includes(partyCode)) {
+              partyPosition = option.value;
+            }
+          });
 
-          // Spesiell håndtering av verdier nær 0 (±0.3)
+          // Hvis partiet ikke er listet under noe alternativ, anta nøytral (0)
+          if (partyPosition === null) {
+            partyPosition = 0;
+          }
+
+          let distance = Math.abs(userAnswer - partyPosition);
           const isUserNearZero = Math.abs(userAnswer) <= 0.3;
           const isPartyNearZero = Math.abs(partyPosition) <= 0.3;
 
@@ -57,7 +66,6 @@ function App() {
       if (validQuestions === 0) {
         scores[partyCode] = 0; // Ingen gyldige svar, sett til 0%
       } else {
-        // Normaliser avstand til [0, 1], der 0 er maks avstand og 1 er ingen avstand
         const maxPossibleDistance = validQuestions * maxDistancePerQuestion;
         const normalizedDistance = totalDistance / maxPossibleDistance;
         const similarity = 1 - normalizedDistance; // 1 er nærmest, 0 er lengst unna
