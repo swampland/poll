@@ -144,7 +144,7 @@ export const questions = [
   },
   {
     id: 14,
-    text: "Bør staten avstå fra å finansiere nyhetsmedier og organisasjoner knyttet til livssyn og religion for å sikre uavhengighet og skille staten fra disse områdene?",
+    text: "Bør staten kutte støtte til medier og trossamfunn for å sikre uavhengighet?",
     options: [
       { id: "A", text: "Sterkt for", value: 2, parties: ["Norgesdemokratene", "FrP", "Konservativt", "Partiet DNI"] },
       { id: "B", text: "For", value: 1, parties: ["Industri- og Næringspartiet"] },
