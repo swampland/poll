@@ -1,17 +1,25 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 
-function Question({ question, onAnswer, currentStep, totalSteps }) {
+function Question({ question, answers, onAnswer, onSkip, onNext, onBack, currentStep, totalSteps, canGoBack }) {
   const [selectedOption, setSelectedOption] = useState(null);
+
+  // Sett initial valgt alternativ basert på tidligere svar (hvis tilgjengelig), men kun ved tilbake-navigering
+  useEffect(() => {
+    if (answers && answers[question.id] !== undefined && answers[question.id] !== null) {
+      setSelectedOption(answers[question.id]);
+    } else {
+      setSelectedOption(null); // Nullstill valget for nye spørsmål
+    }
+  }, [question.id, answers]);
 
   const handleSelect = (optionValue) => {
     setSelectedOption(optionValue);
+    onAnswer(question.id, optionValue);
   };
 
-  const handleSubmit = () => {
-    if (selectedOption !== null) {
-      onAnswer(question.id, selectedOption);
-      setSelectedOption(null);
-    }
+  const handleClear = () => {
+    setSelectedOption(null);
+    onAnswer(question.id, null); // Nullstill svaret i App.js
   };
 
   if (!question) {
@@ -23,38 +31,82 @@ function Question({ question, onAnswer, currentStep, totalSteps }) {
   }
 
   return (
-    <div className="flex flex-col items-center justify-center min-h-screen bg-gray-100 p-4">
-      <p className="text-sm text-gray-600 mb-2">
-        Spørsmål {currentStep} av {totalSteps}
-      </p>
-      <h2 className="text-2xl font-semibold text-gray-800 mb-6 text-center max-w-lg">
-        {question.text}
-      </h2>
-      <div className="space-y-4 w-full max-w-md">
-        {question.options.map((option) => (
-          <label
-            key={option.id}
-            className="flex items-center space-x-3 p-3 bg-white rounded-lg shadow-sm hover:bg-gray-50 cursor-pointer"
-          >
-            <input
-              type="radio"
-              name={`question-${question.id}`}
-              value={option.value}
-              checked={selectedOption === option.value}
-              onChange={() => handleSelect(option.value)}
-              className="form-radio text-blue-600"
-            />
-            <span className="text-gray-700">{option.text}</span>
-          </label>
-        ))}
+    <div className="flex flex-col items-center justify-center min-h-screen bg-gradient-to-r from-pink-400 to-blue-400 p-4">
+      <div className="bg-white p-6 rounded-2xl shadow-lg max-w-2xl w-full min-h-[500px]"> {/* Fast minimumshøyde */}
+        <p className="text-sm text-gray-600 mb-2">
+          Spørsmål {currentStep} av {totalSteps}
+        </p>
+        <p className="text-lg font-semibold text-gray-700 mb-4">{question.category}</p>
+        <h2 className="text-2xl font-bold text-gray-900 mb-6 text-center">
+          {question.text}
+        </h2>
+        <div className="flex flex-col items-center">
+          {/* Låste radioknapper og tekstetiketter sammen i en fleksibel rad */}
+          <div className="w-full flex flex-col items-center">
+            <div className="flex flex-row justify-between w-full mb-4">
+              {question.options.map((option) => (
+                <div key={option.id} className="flex flex-col items-center flex-1">
+                  <input
+                    type="radio"
+                    name={`question-${question.id}`}
+                    value={option.value}
+                    checked={selectedOption === option.value}
+                    onChange={() => handleSelect(option.value)}
+                    className={`w-8 h-8 border-2 border-gray-300 rounded-full appearance-none focus:outline-none focus:ring-2 focus:ring-blue-500 cursor-pointer ${
+                      selectedOption === option.value ? "border-blue-600 bg-blue-600" : ""
+                    }`}
+                  />
+                  <label
+                    onClick={() => handleSelect(option.value)}
+                    className={`mt-2 text-center cursor-pointer hover:text-blue-600 text-sm text-gray-700 font-medium ${
+                      selectedOption === option.value ? "text-blue-600 font-semibold" : ""
+                    }`}
+                  >
+                    {option.text}
+                  </label>
+                </div>
+              ))}
+            </div>
+          </div>
+          {/* "Fjern valg"-knapp inni boksen, med fast posisjon */}
+          {selectedOption !== null && (
+            <button
+              onClick={handleClear}
+              className="mt-4 px-4 py-2 bg-gray-200 text-gray-800 font-semibold rounded-full shadow-md hover:bg-gray-300 transition-colors"
+            >
+              Fjern valg
+            </button>
+          )}
+        </div>
       </div>
-      <button
-        onClick={handleSubmit}
-        disabled={selectedOption === null}
-        className="mt-8 px-6 py-3 bg-blue-600 text-white font-semibold rounded-lg shadow-md hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-      >
-        Neste
-      </button>
+      <div className="mt-6 flex space-x-4">
+        {canGoBack && (
+          <button
+            onClick={onBack}
+            className="flex items-center px-4 py-2 bg-gray-200 text-gray-800 font-semibold rounded-full shadow-md hover:bg-gray-300 transition-colors"
+          >
+            <span className="mr-2 text-xl">←</span>
+            Tilbake
+          </button>
+        )}
+        {selectedOption !== null ? (
+          <button
+            onClick={onNext}
+            className="flex items-center px-4 py-2 bg-blue-500 text-white font-semibold rounded-full shadow-md hover:bg-blue-600 transition-colors"
+          >
+            Neste
+            <span className="ml-2 text-xl">→</span>
+          </button>
+        ) : (
+          <button
+            onClick={onSkip}
+            className="flex items-center px-4 py-2 bg-blue-500 text-white font-semibold rounded-full shadow-md hover:bg-blue-600 transition-colors"
+          >
+            Hopp over
+            <span className="ml-2 text-xl">→</span>
+          </button>
+        )}
+      </div>
     </div>
   );
 }

@@ -14,7 +14,18 @@ function App() {
 
   const handleAnswer = (questionId, optionValue) => {
     setAnswers((prev) => ({ ...prev, [questionId]: optionValue }));
+  };
+
+  const handleSkip = () => {
     setCurrentStep((prev) => prev + 1);
+  };
+
+  const handleNext = () => {
+    setCurrentStep((prev) => prev + 1);
+  };
+
+  const handleBack = () => {
+    setCurrentStep((prev) => Math.max(prev - 1, 1));
   };
 
   const handleRestart = () => {
@@ -24,7 +35,7 @@ function App() {
 
   const calculateResults = () => {
     const scores = {};
-    const maxDistancePerQuestion = 4; // Maks avstand mellom -2 og 2
+    const maxDistancePerQuestion = 4;
 
     Object.keys(parties).forEach((partyCode) => {
       let totalDistance = 0;
@@ -35,16 +46,12 @@ function App() {
 
         if (userAnswer !== undefined) {
           validQuestions++;
-
-          // Finn partiets posisjon ved å sjekke hvilket alternativ det tilhører
           let partyPosition = null;
           question.options.forEach((option) => {
             if (option.parties.includes(partyCode)) {
               partyPosition = option.value;
             }
           });
-
-          // Hvis partiet ikke er listet under noe alternativ, anta nøytral (0)
           if (partyPosition === null) {
             partyPosition = 0;
           }
@@ -54,9 +61,9 @@ function App() {
           const isPartyNearZero = Math.abs(partyPosition) <= 0.3;
 
           if (isUserNearZero && isPartyNearZero) {
-            distance = 0; // Full match hvis begge er nær 0
+            distance = 0;
           } else if (isUserNearZero || isPartyNearZero) {
-            distance *= 2; // Dobbel avstand hvis bare én er nær 0
+            distance *= 2;
           }
 
           totalDistance += distance;
@@ -64,12 +71,12 @@ function App() {
       });
 
       if (validQuestions === 0) {
-        scores[partyCode] = 0; // Ingen gyldige svar, sett til 0%
+        scores[partyCode] = 0;
       } else {
         const maxPossibleDistance = validQuestions * maxDistancePerQuestion;
         const normalizedDistance = totalDistance / maxPossibleDistance;
-        const similarity = 1 - normalizedDistance; // 1 er nærmest, 0 er lengst unna
-        scores[partyCode] = Math.round(similarity * 100); // Konverter til prosent
+        const similarity = 1 - normalizedDistance;
+        scores[partyCode] = Math.round(similarity * 100);
       }
     });
 
@@ -78,8 +85,12 @@ function App() {
       score: scores[partyCode],
     }));
 
-    return resultList.sort((a, b) => b.score - a.score); // Sorter fra høyest til lavest
+    return resultList.sort((a, b) => b.score - a.score);
   };
+
+  const progress = currentStep > 0 && currentStep <= questions.length
+    ? Math.round((currentStep / questions.length) * 100)
+    : 0;
 
   console.log("Current Step:", currentStep);
 
@@ -102,12 +113,25 @@ function App() {
   if (currentStep >= 1 && currentStep <= questions.length) {
     const question = questions[currentStep - 1];
     return (
-      <Question
-        question={question}
-        onAnswer={handleAnswer}
-        currentStep={currentStep}
-        totalSteps={questions.length}
-      />
+      <div className="min-h-screen bg-gradient-to-r from-pink-400 to-blue-400">
+        <div className="w-full bg-gray-200 h-2">
+          <div
+            className="bg-blue-600 h-2"
+            style={{ width: `${progress}%` }}
+          ></div>
+        </div>
+        <Question
+          question={question}
+          answers={answers}
+          onAnswer={handleAnswer}
+          onSkip={handleSkip}
+          onNext={handleNext}
+          onBack={handleBack}
+          currentStep={currentStep}
+          totalSteps={questions.length}
+          canGoBack={currentStep > 1}
+        />
+      </div>
     );
   }
 

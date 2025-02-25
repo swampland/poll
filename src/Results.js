@@ -63,16 +63,23 @@ function Results({ results, answers, onRestart, totalSteps }) {
           Her er en rangert oversikt over hvordan dine svar samsvarer med partiene:
         </p>
         {results.length > 0 ? (
-          <ul className="space-y-2">
+          <ul className="space-y-4">
             {results.map((result, index) => (
               <li
                 key={result.code}
-                className={`flex justify-between items-center p-2 rounded-md shadow-sm text-gray-800 ${getScoreColor(result.score)}`}
+                className={`flex items-center p-2 rounded-md shadow-sm text-gray-800 ${getScoreColor(result.score)}`}
               >
-                <span className="font-semibold">
-                  {index + 1}. {parties[result.code].name}
-                </span>
-                <span className="text-gray-600">{result.score}%</span>
+                <span className="w-12 font-semibold text-right mr-4">{index + 1}.</span>
+                <div className="flex-1">
+                  <span className="font-semibold">{parties[result.code].name}</span>
+                  <div className="w-full bg-gray-200 h-4 mt-1 rounded-full">
+                    <div
+                      className={`h-4 rounded-full ${result.score >= 80 ? "bg-green-500" : result.score >= 50 ? "bg-yellow-500" : "bg-red-500"}`}
+                      style={{ width: `${result.score}%` }}
+                    ></div>
+                  </div>
+                </div>
+                <span className="w-16 text-gray-600 text-right">{result.score}%</span>
               </li>
             ))}
           </ul>
