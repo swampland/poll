@@ -6,4 +6,5 @@ npm run deploy
 
 To deploy to Firebase:
 remove "homepage": "https://username.github.io/poll" from package.json
+npm run build
 firebase deploy --only hosting
