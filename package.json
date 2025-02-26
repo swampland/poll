@@ -1,7 +1,6 @@
 {
   "name": "partiguiden-valgomat-2025",
   "version": "0.1.0",
-  "homepage": "https://swampland.github.io/poll",
   "private": true,
   "dependencies": {
     "@testing-library/dom": "^10.4.0",
@@ -13,6 +12,7 @@
     "firebase": "^11.3.1",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
+    "react-ga": "^3.3.1",
     "react-helmet": "^6.1.0",
     "react-scripts": "^5.0.1",
     "web-vitals": "^2.1.4"

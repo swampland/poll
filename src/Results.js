@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { initializeApp } from "firebase/app";
 import { getFirestore, collection, addDoc } from "firebase/firestore";
+import { getAnalytics, logEvent } from "firebase/analytics"; // For Firebase Analytics
 import axios from "axios";
 import { parties } from "./data";
 
@@ -11,11 +12,13 @@ const firebaseConfig = {
   storageBucket: process.env.REACT_APP_STORAGE_BUCKET,
   messagingSenderId: process.env.REACT_APP_MESSAGING_SENDER_ID,
   appId: process.env.REACT_APP_APP_ID,
-  measurementId: process.env.REACT_APP_MEASUREMENT_ID
+  measurementId: process.env.REACT_APP_MEASUREMENT_ID, // Brukes av Firebase Analytics
 };
 
+// Initialiser Firebase
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
+const analytics = getAnalytics(app); // Initialiser Firebase Analytics
 
 const generateSessionId = () => {
   return Math.random().toString(36).substring(2) + Date.now().toString(36);
@@ -23,30 +26,82 @@ const generateSessionId = () => {
 
 function Results({ results, answers, onRestart, totalSteps }) {
   const [submitted, setSubmitted] = useState(false);
+  const [error, setError] = useState(null); // Legge til feilhåndtering
 
+  // Bruk useEffect for å håndtere sideeffekter (Firebase-innsending)
   useEffect(() => {
+    let mounted = true; // Hindre memory leaks ved unmounting
+
     const submitResults = async () => {
       try {
+        // Hent IP-adresse med axios
         const ipResponse = await axios.get("https://api.ipify.org?format=json");
         const ipAddress = ipResponse.data.ip;
+
+        // Valider data før innsending
+        const validatedAnswers = {};
+        for (const [key, value] of Object.entries(answers)) {
+          validatedAnswers[key] = value === null ? null : Number(value) || value; // Konverter til nummer hvis mulig
+        }
+
+        const validatedResults = results.map(result => ({
+          code: result.code,
+          score: Number(result.score) || 0, // Sikre at score er et tall
+        }));
 
         const sessionData = {
           timestamp: new Date().toISOString(),
           ipAddress,
           userAgent: navigator.userAgent,
           sessionId: generateSessionId(),
-          answers,
-          results,
+          answers: validatedAnswers,
+          results: validatedResults,
         };
 
+        // Logg data for debugging
+        console.log("Sending data to Firestore:", sessionData);
+
+        // Send data til Firestore
         await addDoc(collection(db, "poll_results"), sessionData);
-        setSubmitted(true);
+
+        // Send resultatdata til GA4 via Firebase Analytics
+        logEvent(analytics, 'poll_results_submitted', {
+          sessionId: sessionData.sessionId,
+          totalAnswers: Object.keys(validatedAnswers).length,
+          topParty: validatedResults[0]?.code || 'none', // Høyest rangerte parti
+          topScore: validatedResults[0]?.score || 0, // Høyest poengsum
+          skipCount: Object.values(answers).filter(answer => answer === null).length, // Antall hopp
+        });
+
+        if (mounted) { // Kun oppdater state hvis komponenten fortsatt er montert
+          setSubmitted(true);
+          setError(null); // Nullstill feil ved suksess
+        }
       } catch (error) {
         console.error("Feil ved sending av svar:", error);
+        if (mounted) {
+          setError("Kunne ikke registrere svarene dine. Vennligst prøv igjen senere eller kontakt oss.");
+        }
+        // Logg mer detaljert for debugging
+        if (error.response) {
+          console.error("Response data:", error.response.data);
+          console.error("Response status:", error.response.status);
+          console.error("Response headers:", error.response.headers);
+        } else if (error.request) {
+          console.error("Request data:", error.request);
+        } else {
+          console.error("Error message:", error.message);
+        }
       }
     };
+
     submitResults();
-  }, [answers, results]);
+
+    // Cleanup ved unmounting for å unngå memory leaks
+    return () => {
+      mounted = false;
+    };
+  }, [answers, results]); // Avhengigheter for useEffect
 
   const getScoreColor = (score) => {
     if (score >= 80) return "bg-green-100";
@@ -87,9 +142,14 @@ function Results({ results, answers, onRestart, totalSteps }) {
             </p>
           )}
         </ul>
-        {submitted && (
+        {submitted && !error && (
           <p className="mt-6 sm:mt-4 text-green-600 font-semibold text-center">
             Takk for at du deltok! Dine svar er registrert.
+          </p>
+        )}
+        {error && (
+          <p className="mt-6 sm:mt-4 text-red-600 font-semibold text-center">
+            {error}
           </p>
         )}
         <button
