@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Helmet } from "react-helmet"; // Korrekt import av react-helmet
+import { Helmet } from "react-helmet";
 import Introduction from "./Introduction";
 import Question from "./Question";
 import Results from "./Results";
@@ -157,7 +157,7 @@ function App() {
           <title>{pageTitle}</title>
           <meta name="description" content={`Svar på spørsmål ${currentStep} i Norsk Valgomat for å finne dine politiske preferanser.`} />
         </Helmet>
-        <div className="min-h-screen bg-gradient-to-r from-pink-400 to-blue-400">
+        <div className="min-h-screen md:min-h-screen sm:h-auto bg-gradient-to-r from-pink-400 to-blue-400 p-4">
           <div className="w-full bg-gray-200 h-2">
             <div
               className="bg-blue-600 h-2"
@@ -174,8 +174,8 @@ function App() {
             currentStep={currentStep}
             totalSteps={totalSteps}
             canGoBack={currentStep > 1}
-            maxSkips={8} // Sender maks antall skips som prop
-            skipCount={skipCount} // Sender aktuell skip-teller som prop
+            maxSkips={8}
+            skipCount={skipCount}
           />
         </div>
       </>

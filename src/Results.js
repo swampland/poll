@@ -11,6 +11,7 @@ const firebaseConfig = {
   storageBucket: process.env.REACT_APP_STORAGE_BUCKET,
   messagingSenderId: process.env.REACT_APP_MESSAGING_SENDER_ID,
   appId: process.env.REACT_APP_APP_ID,
+  measurementId: process.env.REACT_APP_MEASUREMENT_ID
 };
 
 const app = initializeApp(firebaseConfig);
@@ -54,52 +55,50 @@ function Results({ results, answers, onRestart, totalSteps }) {
   };
 
   return (
-    <div className="flex flex-col items-center justify-center min-h-screen bg-gray-100 p-4">
-      <h2 className="text-3xl font-bold text-gray-800 mb-6 text-center">
-        Din politiske tilhørighet
-      </h2>
-      <div className="text-center max-w-lg w-full">
-        <p className="text-lg text-gray-600 mb-4">
+    <div className="flex flex-col items-center justify-center min-h-screen md:min-h-screen sm:h-auto bg-gray-100 p-4 sm:p-2">
+      <div className="bg-white p-6 sm:p-4 rounded-2xl shadow-lg max-w-2xl w-full">
+        <h1 className="text-3xl sm:text-2xl font-bold text-gray-900 mb-6 sm:mb-4 text-center">Din politiske tilhørighet</h1>
+        <p className="text-lg sm:text-base text-gray-600 mb-6 sm:mb-4 text-center">
           Her er en rangert oversikt over hvordan dine svar samsvarer med partiene:
         </p>
-        {results.length > 0 ? (
-          <ul className="space-y-4">
-            {results.map((result, index) => (
+        <ul className="space-y-4 sm:space-y-2">
+          {results.length > 0 ? (
+            results.map((result, index) => (
               <li
                 key={result.code}
-                className={`flex items-center p-2 rounded-md shadow-sm text-gray-800 ${getScoreColor(result.score)}`}
+                className={`flex flex-col sm:flex-row items-center sm:items-start p-2 sm:p-3 rounded-md shadow-sm text-gray-800 ${getScoreColor(result.score)}`}
               >
-                <span className="w-12 font-semibold text-right mr-4">{index + 1}.</span>
-                <div className="flex-1">
-                  <span className="font-semibold">{parties[result.code].name}</span>
-                  <div className="w-full bg-gray-200 h-4 mt-1 rounded-full">
+                <span className="w-12 sm:w-16 font-semibold text-right mr-2 sm:mr-4 mb-2 sm:mb-0">{index + 1}.</span>
+                <div className="flex-1 w-full sm:w-auto">
+                  <span className="font-semibold block sm:inline">{parties[result.code].name}</span>
+                  <div className="w-full bg-gray-200 h-4 mt-1 sm:mt-2 rounded-full">
                     <div
                       className={`h-4 rounded-full ${result.score >= 80 ? "bg-green-500" : result.score >= 50 ? "bg-yellow-500" : "bg-red-500"}`}
                       style={{ width: `${result.score}%` }}
                     ></div>
                   </div>
+                  <span className="block sm:inline sm:ml-4 text-gray-600 text-right sm:text-left">{result.score}%</span>
                 </div>
-                <span className="w-16 text-gray-600 text-right">{result.score}%</span>
               </li>
-            ))}
-          </ul>
-        ) : (
-          <p className="text-lg text-gray-600">
-            Ingen partier matchet dine svar fullstendig.
+            ))
+          ) : (
+            <p className="text-lg sm:text-base text-gray-600 text-center">
+              Ingen partier matchet dine svar fullstendig.
+            </p>
+          )}
+        </ul>
+        {submitted && (
+          <p className="mt-6 sm:mt-4 text-green-600 font-semibold text-center">
+            Takk for at du deltok! Dine svar er registrert.
           </p>
         )}
+        <button
+          onClick={onRestart}
+          className="mt-8 sm:mt-6 px-6 sm:px-4 py-3 sm:py-2 bg-blue-600 text-white font-semibold rounded-full shadow-md hover:bg-blue-700 transition-colors w-full sm:w-auto"
+        >
+          Start på nytt
+        </button>
       </div>
-      {submitted && (
-        <p className="mt-6 text-green-600 font-semibold">
-          Takk for at du deltok! Dine svar er registrert.
-        </p>
-      )}
-      <button
-        onClick={onRestart}
-        className="mt-8 px-6 py-3 bg-blue-600 text-white font-semibold rounded-lg shadow-md hover:bg-blue-700 transition-colors"
-      >
-        Start på nytt
-      </button>
     </div>
   );
 }
