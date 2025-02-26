@@ -187,17 +187,17 @@ function App() {
   console.log("Current Step:", currentStep, "Skip Count:", skipCount);
 
   const pageTitle = currentStep === 0
-    ? "Norsk Valgomat - Velkommen"
+    ? "Partiguiden Valgomat - Velkommen"
     : currentStep > totalSteps
-    ? "Norsk Valgomat - Resultater"
-    : `Norsk Valgomat - Spørsmål ${currentStep} av ${totalSteps}`;
+    ? "Partiguiden Valgomat - Resultater"
+    : `Partiguiden Valgomat - Spørsmål ${currentStep} av ${totalSteps}`;
 
   if (currentStep === 0) {
     return (
       <>
         <Helmet>
           <title>{pageTitle}</title>
-          <meta name="description" content="Velkommen til Norsk Valgomat. Finn ut hvilke politiske partier passer best til dine synspunkter." />
+          <meta name="description" content="Velkommen til Partiguiden Valgomat. Finn ut hvilke politiske partier passer best til dine synspunkter." />
         </Helmet>
         <Introduction onStart={handleStart} />
       </>
@@ -213,7 +213,7 @@ function App() {
       <>
         <Helmet>
           <title>{pageTitle}</title>
-          <meta name="description" content="Se resultatene dine fra Norsk Valgomat og finn ut hvilke partier samsvarer med dine synspunkter." />
+          <meta name="description" content="Se resultatene dine fra Partiguiden Valgomat og finn ut hvilke partier samsvarer med dine synspunkter." />
         </Helmet>
         <Results
           results={results}
@@ -231,7 +231,7 @@ function App() {
       <>
         <Helmet>
           <title>{pageTitle}</title>
-          <meta name="description" content={`Svar på spørsmål ${currentStep} i Norsk Valgomat for å finne dine politiske preferanser.`} />
+          <meta name="description" content={`Svar på spørsmål ${currentStep} i Partiguiden Valgomat for å finne dine politiske preferanser.`} />
         </Helmet>
         <div className="min-h-screen md:min-h-screen sm:h-auto bg-gradient-to-r from-pink-400 to-blue-400 p-4 sm:p-2">
           <div className="w-full bg-gray-200 h-2">
