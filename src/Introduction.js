@@ -2,18 +2,16 @@ import React from "react";
 
 function Introduction({ onStart }) {
   return (
-    <div className="flex flex-col items-center justify-center min-h-screen bg-gray-100 p-4">
-      <h1 className="text-4xl font-bold text-gray-800 mb-4">
-        Norsk Politisk Poll 2025
-      </h1>
-      <p className="text-lg text-gray-600 mb-8 text-center max-w-md">
-        Svar på en serie spørsmål for å finne ut hvilket politisk parti som passer best med dine synspunkter frem mot stortingsvalget i 2025.
+    <div className="flex flex-col items-center justify-center min-h-screen bg-gradient-to-r from-pink-400 to-blue-400 p-4">
+      <h1 className="text-3xl font-bold text-white mb-6 text-center">Velkommen til Valgomaten for Partiguiden 2025</h1>
+      <p className="text-lg text-white mb-6 text-center max-w-md">
+        Finn ut hvilke partier passer best for dine politiske synspunkter. Trykk på "Start" for å begynne!
       </p>
       <button
         onClick={onStart}
-        className="px-6 py-3 bg-blue-600 text-white font-semibold rounded-lg shadow-md hover:bg-blue-700 transition-colors"
+        className="px-6 py-3 bg-blue-500 text-white font-semibold rounded-full shadow-md hover:bg-blue-600 transition-colors"
       >
-        Start Poll
+        Start
       </button>
     </div>
   );
