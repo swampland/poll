@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { Helmet } from "react-helmet"; // Korrekt import av react-helmet
 import Introduction from "./Introduction";
 import Question from "./Question";
 import Results from "./Results";
@@ -7,6 +8,8 @@ import { questions, parties } from "./data";
 function App() {
   const [currentStep, setCurrentStep] = useState(0);
   const [answers, setAnswers] = useState({});
+  const [skipCount, setSkipCount] = useState(0); // Teller for antall skips
+  const totalSteps = questions.length; // Definer totalSteps her for å unngå no-undef
 
   const handleStart = () => {
     setCurrentStep(1);
@@ -17,7 +20,12 @@ function App() {
   };
 
   const handleSkip = () => {
-    setCurrentStep((prev) => prev + 1);
+    if (skipCount < 8) { // Begrens til 8 skips
+      setSkipCount((prev) => prev + 1);
+      setCurrentStep((prev) => prev + 1);
+    } else {
+      alert("Du har nådd maksimalt antall hopp (8). Vennligst svar på dette spørsmålet eller gå tilbake.");
+    }
   };
 
   const handleNext = () => {
@@ -31,9 +39,17 @@ function App() {
   const handleRestart = () => {
     setCurrentStep(0);
     setAnswers({});
+    setSkipCount(0); // Tilbakestill skip-teller ved restart
   };
 
   const calculateResults = () => {
+    const answeredCount = Object.keys(answers).filter(id => answers[id] !== null).length;
+    if (answeredCount < 8) { // Sjekk om minst 8 spørsmål er besvart
+      alert("Du må svare på minst 8 spørsmål for å se resultatene. Du har besvart " + answeredCount + " spørsmål.");
+      setCurrentStep(totalSteps); // Gå tilbake til det siste spørsmålet
+      return null;
+    }
+
     const scores = {};
     const maxDistancePerQuestion = 4;
 
@@ -44,7 +60,7 @@ function App() {
       questions.forEach((question) => {
         const userAnswer = answers[question.id];
 
-        if (userAnswer !== undefined) {
+        if (userAnswer !== null && userAnswer !== undefined) { // Kun tell besvarte spørsmål (ikke null)
           validQuestions++;
           let partyPosition = null;
           question.options.forEach((option) => {
@@ -88,50 +104,81 @@ function App() {
     return resultList.sort((a, b) => b.score - a.score);
   };
 
-  const progress = currentStep > 0 && currentStep <= questions.length
-    ? Math.round((currentStep / questions.length) * 100)
+  const progress = currentStep > 0 && currentStep <= totalSteps
+    ? Math.round((currentStep / totalSteps) * 100)
     : 0;
 
-  console.log("Current Step:", currentStep);
+  console.log("Current Step:", currentStep, "Skip Count:", skipCount);
+
+  const pageTitle = currentStep === 0
+    ? "Norsk Valgomat - Velkommen"
+    : currentStep > totalSteps
+    ? "Norsk Valgomat - Resultater"
+    : `Norsk Valgomat - Spørsmål ${currentStep} av ${totalSteps}`;
 
   if (currentStep === 0) {
-    return <Introduction onStart={handleStart} />;
-  }
-
-  if (currentStep > questions.length) {
-    const results = calculateResults();
     return (
-      <Results
-        results={results}
-        answers={answers}
-        onRestart={handleRestart}
-        totalSteps={questions.length}
-      />
+      <>
+        <Helmet>
+          <title>{pageTitle}</title>
+          <meta name="description" content="Velkommen til Norsk Valgomat. Finn ut hvilke politiske partier passer best til dine synspunkter." />
+        </Helmet>
+        <Introduction onStart={handleStart} />
+      </>
     );
   }
 
-  if (currentStep >= 1 && currentStep <= questions.length) {
+  if (currentStep > totalSteps) {
+    const results = calculateResults();
+    if (!results) {
+      return null;
+    }
+    return (
+      <>
+        <Helmet>
+          <title>{pageTitle}</title>
+          <meta name="description" content="Se resultatene dine fra Norsk Valgomat og finn ut hvilke partier samsvarer med dine synspunkter." />
+        </Helmet>
+        <Results
+          results={results}
+          answers={answers}
+          onRestart={handleRestart}
+          totalSteps={totalSteps}
+        />
+      </>
+    );
+  }
+
+  if (currentStep >= 1 && currentStep <= totalSteps) {
     const question = questions[currentStep - 1];
     return (
-      <div className="min-h-screen bg-gradient-to-r from-pink-400 to-blue-400">
-        <div className="w-full bg-gray-200 h-2">
-          <div
-            className="bg-blue-600 h-2"
-            style={{ width: `${progress}%` }}
-          ></div>
+      <>
+        <Helmet>
+          <title>{pageTitle}</title>
+          <meta name="description" content={`Svar på spørsmål ${currentStep} i Norsk Valgomat for å finne dine politiske preferanser.`} />
+        </Helmet>
+        <div className="min-h-screen bg-gradient-to-r from-pink-400 to-blue-400">
+          <div className="w-full bg-gray-200 h-2">
+            <div
+              className="bg-blue-600 h-2"
+              style={{ width: `${progress}%` }}
+            ></div>
+          </div>
+          <Question
+            question={question}
+            answers={answers}
+            onAnswer={handleAnswer}
+            onSkip={handleSkip}
+            onNext={handleNext}
+            onBack={handleBack}
+            currentStep={currentStep}
+            totalSteps={totalSteps}
+            canGoBack={currentStep > 1}
+            maxSkips={8} // Sender maks antall skips som prop
+            skipCount={skipCount} // Sender aktuell skip-teller som prop
+          />
         </div>
-        <Question
-          question={question}
-          answers={answers}
-          onAnswer={handleAnswer}
-          onSkip={handleSkip}
-          onNext={handleNext}
-          onBack={handleBack}
-          currentStep={currentStep}
-          totalSteps={questions.length}
-          canGoBack={currentStep > 1}
-        />
-      </div>
+      </>
     );
   }
 

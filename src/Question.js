@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 
-function Question({ question, answers, onAnswer, onSkip, onNext, onBack, currentStep, totalSteps, canGoBack }) {
+function Question({ question, answers, onAnswer, onSkip, onNext, onBack, currentStep, totalSteps, canGoBack, maxSkips, skipCount }) {
   const [selectedOption, setSelectedOption] = useState(null);
 
   // Sett initial valgt alternativ basert på tidligere svar (hvis tilgjengelig), men kun ved tilbake-navigering
@@ -100,7 +100,10 @@ function Question({ question, answers, onAnswer, onSkip, onNext, onBack, current
         ) : (
           <button
             onClick={onSkip}
-            className="flex items-center px-4 py-2 bg-blue-500 text-white font-semibold rounded-full shadow-md hover:bg-blue-600 transition-colors"
+            disabled={skipCount >= maxSkips} // Deaktiver "Hopp over" når maks skips er nådd
+            className={`flex items-center px-4 py-2 bg-blue-500 text-white font-semibold rounded-full shadow-md hover:bg-blue-600 transition-colors ${
+              skipCount >= maxSkips ? "opacity-50 cursor-not-allowed" : ""
+            }`}
           >
             Hopp over
             <span className="ml-2 text-xl">→</span>
