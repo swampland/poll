@@ -24,6 +24,71 @@ const generateSessionId = () => {
   return Math.random().toString(36).substring(2) + Date.now().toString(36);
 };
 
+async function hashIP(ipAddress) {
+  const salt = "poll_analysis_2025_secure_salt_v1";
+  const saltedIP = salt + ipAddress;
+  
+  const encoder = new TextEncoder();
+  const data = encoder.encode(saltedIP);
+  const hashBuffer = await crypto.subtle.digest('SHA-256', data);
+  const hashArray = Array.from(new Uint8Array(hashBuffer));
+  const hashHex = hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+  
+  return hashHex;
+}
+
+function minimizeCoordinates(lat, lon, precision = 1) {
+  if (lat === null || lon === null) return { lat: null, lon: null };
+  
+  return {
+    lat: Math.round(lat * Math.pow(10, precision)) / Math.pow(10, precision),
+    lon: Math.round(lon * Math.pow(10, precision)) / Math.pow(10, precision)
+  };
+}
+
+async function getGeolocation(ipAddress) {
+  try {
+    const response = await axios.get(`https://ipinfo.io/${ipAddress}/json`, {
+      timeout: 5000
+    });
+    
+    if (response.data && response.data.ip) {
+      // Parse coordinates from "lat,lon" format
+      let latitude = null;
+      let longitude = null;
+      
+      if (response.data.loc) {
+        const [lat, lon] = response.data.loc.split(',').map(coord => parseFloat(coord));
+        const minimizedCoords = minimizeCoordinates(lat, lon, 1);
+        latitude = minimizedCoords.lat;
+        longitude = minimizedCoords.lon;
+      }
+
+      return {
+        country: response.data.country || 'Unknown',
+        region: response.data.region || 'Unknown',
+        city: response.data.city || 'Unknown',
+        zip: response.data.postal || 'Unknown',
+        latitude: latitude,
+        longitude: longitude,
+        as: response.data.org || 'Unknown'
+      };
+    }
+  } catch (error) {
+    console.warn('ipinfo.io failed:', error.message);
+  }
+  
+  return {
+    country: 'Unknown',
+    region: 'Unknown',
+    city: 'Unknown',
+    zip: 'Unknown',
+    latitude: null,
+    longitude: null,    
+    as: 'Unknown'
+  };
+}
+
 function Results({ results, answers, onRestart, totalSteps }) {
   const [submitted, setSubmitted] = useState(false);
   const [error, setError] = useState(null); // Legge til feilhåndtering
@@ -38,6 +103,9 @@ function Results({ results, answers, onRestart, totalSteps }) {
         const ipResponse = await axios.get("https://api.ipify.org?format=json");
         const ipAddress = ipResponse.data.ip;
 
+        const hashedIP = await hashIP(ipAddress);
+        const geoData = await getGeolocation(ipAddress);
+      
         // Valider data før innsending
         const validatedAnswers = {};
         for (const [key, value] of Object.entries(answers)) {
@@ -51,7 +119,8 @@ function Results({ results, answers, onRestart, totalSteps }) {
 
         const sessionData = {
           timestamp: new Date().toISOString(),
-          ipAddress,
+          hashedIP: hashedIP,
+          geoData: geoData,
           userAgent: navigator.userAgent,
           sessionId: generateSessionId(),
           answers: validatedAnswers,
@@ -62,7 +131,7 @@ function Results({ results, answers, onRestart, totalSteps }) {
         console.log("Sending data to Firestore:", sessionData);
 
         // Send data til Firestore
-        await addDoc(collection(db, "poll_results"), sessionData);
+        await addDoc(collection(db, "poll_results2"), sessionData);
 
         // Send resultatdata til GA4 via Firebase Analytics
         logEvent(analytics, 'poll_results_submitted', {
@@ -125,7 +194,21 @@ function Results({ results, answers, onRestart, totalSteps }) {
               >
                 <span className="w-12 sm:w-16 font-semibold text-right mr-2 sm:mr-4 mb-2 sm:mb-0">{index + 1}.</span>
                 <div className="flex-1 w-full sm:w-auto">
-                  <span className="font-semibold block sm:inline">{parties[result.code].name}</span>
+                  <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between">
+                    <div className="flex flex-col">
+                      <span className="font-semibold block">{parties[result.code].name}</span>
+                      {parties[result.code].website && (
+                        <a
+                          href={parties[result.code].website}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-blue-600 hover:text-blue-800 hover:underline text-sm mt-1"
+                        >
+                          {parties[result.code].website}
+                        </a>
+                      )}
+                    </div>
+                  </div>
                   <div className="w-full bg-gray-200 h-4 mt-1 sm:mt-2 rounded-full">
                     <div
                       className={`h-4 rounded-full ${result.score >= 80 ? "bg-green-500" : result.score >= 50 ? "bg-yellow-500" : "bg-red-500"}`}

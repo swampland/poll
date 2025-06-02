@@ -200,23 +200,99 @@ export const questions = [
 ];
 
 export const parties = {
-  "Norgesdemokratene": { name: "Norgesdemokratene", description: "Parti med fokus på nasjonale interesser og innvandringskontroll." },
-  "Konservativt": { name: "Konservativt", description: "Konservativt parti med fokus på tradisjonelle verdier og markedsøkonomi." },
-  "Generasjonspartiet": { name: "Generasjonspartiet", description: "Parti med fokus på direktedemokrati." },
-  "Industri- og Næringspartiet": { name: "Industri- og Næringspartiet", description: "Parti med fokus på industri og næringsutvikling." },
-  "Partiet DNI": { name: "Partiet DNI", description: "Parti med fokus på industri og næringsutvikling." },
-  "Pensjonistpartiet": { name: "Pensjonistpartiet", description: "Parti med fokus på pensjonisters rettigheter." },
-  "Partiet Sentrum": { name: "Partiet Sentrum", description: "Sentrumsparti med fokus på sosial rettferdighet og miljø." },
-  "Velferd og Innovasjonspartiet": { name: "Velferd og Innovasjonspartiet", description: "Parti med fokus på helse, velferd og innovasjon." },
-  "FOR": { name: "Fred og Rettferdighet", description: "Parti med fokus på fred og rettferdighet." },
-  "Ensomhetspartiet": { name: "Ensomhetspartiet", description: "Parti med fokus på å bekjempe ensomhet." },
-  "AP": { name: "Arbeiderpartiet", description: "Sosialdemokratisk parti med fokus på velferd og likhet." },
-  "FrP": { name: "Fremskrittspartiet", description: "Liberalistisk folkeparti som fokuserer på lavere skatter, valgfrihet og streng innvandringspolitikk." },
-  "H": { name: "Høyre", description: "Sosialkonservativt parti som støtter blandingsøkonomi." },
-  "Sp": { name: "Senterpartiet", description: "Sentrumsparti med fokus på distriktspolitikk og landbruk." },
-  "KrF": { name: "Kristelig Folkeparti", description: "Kristendemokratisk parti med fokus på familieverdier og velferd." },
-  "V": { name: "Venstre", description: "Liberalt parti med fokus på frihet og miljø." },
-  "SV": { name: "SV - Sosialistisk Venstreparti", description: "Sosialistisk parti med fokus på velferd og miljø." },
-  "R": { name: "Rødt", description: "Venstresideparti med fokus på sosialisme og likhet." },
-  "MDG": { name: "Miljøpartiet De Grønne", description: "Miljøparti med fokus på bærekraft og grønn politikk." },
+  "Norgesdemokratene": { 
+    name: "Norgesdemokratene", 
+    description: "Parti med fokus på nasjonale interesser og innvandringskontroll.",
+    website: "https://www.nodem.no"
+  },
+  "Konservativt": { 
+    name: "Konservativt", 
+    description: "Konservativt parti med fokus på tradisjonelle verdier og markedsøkonomi.",
+    website: "https://www.konservativt.no"
+  },
+  "Generasjonspartiet": { 
+    name: "Generasjonspartiet", 
+    description: "Parti med fokus på direktedemokrati.",
+    website: "https://www.generasjonspartiet.no"
+  },
+  "Industri- og Næringspartiet": { 
+    name: "Industri- og Næringspartiet", 
+    description: "Parti med fokus på industri og næringsutvikling.",
+    website: "https://www.inpartiet.no"
+  },
+  "Partiet DNI": { 
+    name: "Partiet DNI", 
+    description: "Parti med fokus på industri og næringsutvikling.",
+    website: "https://www.partietdni.no"
+  },
+  "Pensjonistpartiet": { 
+    name: "Pensjonistpartiet", 
+    description: "Parti med fokus på pensjonisters rettigheter.",
+    website: "https://www.pensjonistpartiet.no"
+  },
+  "Partiet Sentrum": { 
+    name: "Partiet Sentrum", 
+    description: "Sentrumsparti med fokus på sosial rettferdighet og miljø.",
+    website: "https://www.partietsentrum.no"
+  },
+  "Velferd og Innovasjonspartiet": { 
+    name: "Velferd og Innovasjonspartiet", 
+    description: "Parti med fokus på helse, velferd og innovasjon.",
+    website: "https://www.vipartiet.no"
+  },
+  "FOR": { 
+    name: "Fred og Rettferdighet", 
+    description: "Parti med fokus på fred og rettferdighet.",
+    website: "https://www.partiet-for.no"
+  },
+  "Ensomhetspartiet": { 
+    name: "Ensomhetspartiet", 
+    description: "Parti med fokus på å bekjempe ensomhet.",
+    website: "https://www.ensomhetspartiet.no"
+  },
+  "AP": { 
+    name: "Arbeiderpartiet", 
+    description: "Sosialdemokratisk parti med fokus på velferd og likhet.",
+    website: "https://www.arbeiderpartiet.no"
+  },
+  "FrP": { 
+    name: "Fremskrittspartiet", 
+    description: "Liberalistisk folkeparti som fokuserer på lavere skatter, valgfrihet og streng innvandringspolitikk.",
+    website: "https://www.frp.no"
+  },
+  "H": { 
+    name: "Høyre", 
+    description: "Sosialkonservativt parti som støtter blandingsøkonomi.",
+    website: "https://www.hoyre.no"
+  },
+  "Sp": { 
+    name: "Senterpartiet", 
+    description: "Sentrumsparti med fokus på distriktspolitikk og landbruk.",
+    website: "https://www.senterpartiet.no"
+  },
+  "KrF": { 
+    name: "Kristelig Folkeparti", 
+    description: "Kristendemokratisk parti med fokus på familieverdier og velferd.",
+    website: "https://www.krf.no"
+  },
+  "V": { 
+    name: "Venstre", 
+    description: "Liberalt parti med fokus på frihet og miljø.",
+    website: "https://www.venstre.no"
+  },
+  "SV": { 
+    name: "SV - Sosialistisk Venstreparti", 
+    description: "Sosialistisk parti med fokus på velferd og miljø.",
+    website: "https://www.sv.no"
+  },
+  "R": { 
+    name: "Rødt", 
+    description: "Venstresideparti med fokus på sosialisme og likhet.",
+    website: "https://www.roedt.no"
+  },
+  "MDG": { 
+    name: "Miljøpartiet De Grønne", 
+    description: "Miljøparti med fokus på bærekraft og grønn politikk.",
+    website: "https://www.mdg.no"
+  },
 };

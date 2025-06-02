@@ -6,6 +6,7 @@ import { getAnalytics, logEvent } from "firebase/analytics"; // For Firebase Ana
 import Introduction from "./Introduction";
 import Question from "./Question";
 import Results from "./Results";
+import PrivacyNotice from './PrivacyNotice';
 import { questions, parties } from "./data";
 
 const firebaseConfig = {
@@ -199,7 +200,8 @@ function App() {
           <title>{pageTitle}</title>
           <meta name="description" content="Velkommen til Partiguiden Valgomat. Finn ut hvilke politiske partier passer best til dine synspunkter." />
         </Helmet>
-        <Introduction onStart={handleStart} />
+        <Introduction onStart={handleStart} />              
+        <PrivacyNotice />
       </>
     );
   }
